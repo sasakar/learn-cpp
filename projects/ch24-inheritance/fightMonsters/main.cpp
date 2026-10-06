@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <string_view>
+#include "Random.h" // defines Random::mt, Random::get(), and Random::generate()
 
 class Creature {
 private:
@@ -88,25 +89,33 @@ public:
     Monster(Type type)
         : Creature { monsterData[type] }
     {}
+
+    static const Monster getRandomMonster() {
+        Type type { static_cast<Type>(Random::get(0, Type::max_types-1)) };
+        return Monster { type };
+    }
 };
 
 int main()
 {
-	Creature o{ "orc", 'o', 4, 2, 10 };
-	o.addGold(5);
-	o.reduceHealth(1);
-	std::cout << "The " << o.getName() << " has " << o.getHealth() << " health and is carrying " << o.getGold() << " gold.\n";
+	// Creature o{ "orc", 'o', 4, 2, 10 };
+	// o.addGold(5);
+	// o.reduceHealth(1);
+	// std::cout << "The " << o.getName() << " has " << o.getHealth() << " health and is carrying " << o.getGold() << " gold.\n";
 
-    std::cout << "Enter your name: ";
-    std::string name {};
-    std::cin >> name;
-    Player player { name };
-    std::cout << "Welcome, " << player.getName() << "\n";
-    std::cout << "You have " << player.getHealth() << " health and are "
-              << "carrying " << player.getGold() << " gold.\n";
+    // std::cout << "Enter your name: ";
+    // std::string name {};
+    // std::cin >> name;
+    // Player player { name };
+    // std::cout << "Welcome, " << player.getName() << "\n";
+    // std::cout << "You have " << player.getHealth() << " health and are "
+    //           << "carrying " << player.getGold() << " gold.\n";
 
-    Monster m{ Monster::Type::orc };
-	std::cout << "A " << m.getName() << " (" << m.getSymbol() << ") was created.\n";
+    for (int i{ 0 }; i < 10; ++i)
+	{
+		Monster m{ Monster::getRandomMonster() };
+		std::cout << "A " << m.getName() << " (" << m.getSymbol() << ") was created.\n";
+	}
 
 	return 0;
 }
