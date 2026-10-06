@@ -1,12 +1,12 @@
+#include "Random.h" // defines Random::mt, Random::get(), and Random::generate()
+
 #include <iostream>
 #include <string>
 #include <string_view>
 #include <cctype>
-#include "Random.h" // defines Random::mt, Random::get(), and Random::generate()
-
 
 class Creature {
-private:
+protected:
     std::string mName {};
     char mSymbol {};
     int mHealth {};
@@ -25,27 +25,10 @@ public:
     int getHealth() const { return mHealth; }
     int getDamage() const { return mDamage; }
     int getGold() const { return mGold; }
-
-    void reduceHealth(int damage) {
-        mHealth -= damage;
-    }
-
-    bool isDead() {
-        if (mHealth <= 0) {
-            return true;
-        }
-
-        return false;
-    }
-
-    void addGold(int amount) {
-        mGold += amount;
-    }
-
-    void addDamage(int damage) {
-        mDamage += damage;
-    }
-
+    void reduceHealth(int health) { mHealth -= health; }
+    bool isDead() { return mHealth <= 0; }
+    void addGold(int amount) { mGold += amount; }
+    void addDamage(int damage) { mDamage += damage; }
 };
 
 class Player : public Creature {
@@ -58,19 +41,12 @@ public:
     {}
 
     void levelUp() {
-        mLevel += 1;
-        addDamage(1);
+        ++mLevel;
+        ++mDamage;
     }
 
     int getLevel() const { return mLevel; }
-
-    bool hasWon() {
-        if (mLevel == 20) {
-            return true;
-        }
-
-        return false;
-    }
+    bool hasWon() { return mLevel >= 20; }
 };
 
 class Monster : public Creature {
@@ -93,8 +69,8 @@ public:
     {}
 
     static const Monster getRandomMonster() {
-        Type type { static_cast<Type>(Random::get(0, Type::max_types-1)) };
-        return Monster { type };
+        int num { Random::get(0, Type::max_types-1) };
+        return Monster { static_cast<Type>(num) };
     }
 };
 
