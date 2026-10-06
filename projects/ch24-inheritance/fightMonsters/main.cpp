@@ -140,7 +140,6 @@ void attackMonster(Monster& m, Player& player) {
 
 void fightMonster(Player& player) {
     char choice {};
-    bool hasEscaped { false };
     while (true) {
         Monster m { Monster::getRandomMonster() };
         std::cout << "You have encountered a " << m.getName() 
@@ -153,7 +152,7 @@ void fightMonster(Player& player) {
 
             choice = getChoice();
             if (choice == 'r') {
-                hasEscaped = Random::get(0, 1);
+                bool hasEscaped { static_cast<bool>(Random::get(0, 1)) };
                 if (hasEscaped) {
                     std::cout << "You successfully fled.\n";
                     break;
