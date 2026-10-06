@@ -70,6 +70,26 @@ public:
     }
 };
 
+class Monster : public Creature {
+public:
+    enum Type {
+        dragon,
+        orc,
+        slime,
+        max_types
+    };
+
+    static inline Creature monsterData[] {
+        {"dragon", 'D', 20, 4, 100},
+        {"orc", 'o', 4, 2, 25},
+        {"slime", 's', 1, 1, 10}
+    };
+
+    Monster(Type type)
+        : Creature { monsterData[type] }
+    {}
+};
+
 int main()
 {
 	Creature o{ "orc", 'o', 4, 2, 10 };
@@ -84,6 +104,9 @@ int main()
     std::cout << "Welcome, " << player.getName() << "\n";
     std::cout << "You have " << player.getHealth() << " health and are "
               << "carrying " << player.getGold() << " gold.\n";
+
+    Monster m{ Monster::Type::orc };
+	std::cout << "A " << m.getName() << " (" << m.getSymbol() << ") was created.\n";
 
 	return 0;
 }
