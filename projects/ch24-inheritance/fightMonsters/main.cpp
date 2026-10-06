@@ -161,7 +161,7 @@ void fightMonster(Player& player) {
             }
         } 
         
-        if (player.isDead()) {
+        if (player.isDead() || player.hasWon()) {
             break;
         }
     }
