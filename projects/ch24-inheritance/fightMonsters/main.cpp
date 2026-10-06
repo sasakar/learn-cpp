@@ -98,8 +98,6 @@ public:
     }
 };
 
-void attackPlayer(Monster&, Player&);
-
 char getChoice() {
     char choice {};
     while (true) {
@@ -114,6 +112,12 @@ char getChoice() {
 
         std::cout << "Invalid choice, try again.\n";
     }
+}
+
+void attackPlayer(Monster& m, Player& player) {
+    std::cout << "The " << m.getName() << " hit you for " 
+              << m.getDamage() << " damage.\n";
+    player.reduceHealth(m.getDamage());
 }
 
 void attackMonster(Monster& m, Player& player) {
@@ -132,12 +136,6 @@ void attackMonster(Monster& m, Player& player) {
     } else {
         attackPlayer(m, player);
     }
-}
-
-void attackPlayer(Monster& m, Player& player) {
-    std::cout << "The " << m.getName() << " hit you for " 
-              << m.getDamage() << " damage.\n";
-    player.reduceHealth(m.getDamage());
 }
 
 void fightMonster(Player& player) {
@@ -164,9 +162,8 @@ void fightMonster(Player& player) {
                     attackPlayer(m, player);
                     continue;
                 }
-            }
-
-            if (choice == 'f') {
+            } 
+            else if (choice == 'f') {
                 attackMonster(m, player);
             }
         } 
