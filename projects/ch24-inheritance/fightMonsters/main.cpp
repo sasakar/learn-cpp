@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <string_view>
+#include <cctype>
 #include "Random.h" // defines Random::mt, Random::get(), and Random::generate()
 
 
@@ -101,9 +102,18 @@ void attackPlayer(Monster&, Player&);
 
 char getChoice() {
     char choice {};
-    std::cout << "(R)un or (F)ight: ";
-    std::cin >> choice;
-    return choice;
+    while (true) {
+        std::cout << "(R)un or (F)ight: ";
+        std::cin >> choice;
+        choice = static_cast<char>(
+            std::towlower(static_cast<unsigned char>(choice)));
+
+        if (choice == 'r' || choice == 'f') {
+            return choice;
+        }
+
+        std::cout << "Invalid choice, try again.\n";
+    }
 }
 
 void attackMonster(Monster& m, Player& player) {
