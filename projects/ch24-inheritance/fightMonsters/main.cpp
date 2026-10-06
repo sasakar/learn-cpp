@@ -1,10 +1,88 @@
 #include "Random.h" // defines Random::mt, Random::get(), and Random::generate()
 
 #include <iostream>
+#include <array>
+#include <sstream>
 #include <string>
 #include <string_view>
 #include <cctype>
 
+class Potion {
+public:
+    // All possible types of potions
+    enum Type {
+        health,
+        strength,
+        poison,
+
+        // For random generation
+        max_type
+    };
+
+    enum Size {
+        small,
+        medium,
+        large,
+
+        max_size
+    };
+
+private:
+    Type mType {};
+    Size mSize {};
+
+public:
+    Potion(Type type, Size size)
+        : mType { type }, mSize { size }
+    {}
+
+    Type getType() const { return mType; }
+    Size getSize() const { return mSize; }
+
+    // The names of potions are compile-time literals, we can
+    // return a std::string_view
+    static std::string_view getPotionTypeName(Type type) {
+        static constexpr std::string_view names[] {
+            "Health",
+            "Strength",
+            "Poison"
+        };
+
+        return names[type];
+    }
+
+    static std::string_view getPotionSizeName(Size size) {
+        static constexpr std::string_view names[] {
+            "Small",
+            "Medium",
+            "Large"
+        };
+
+        return names[size];
+    }
+
+    std::string getName() const {
+        std::stringstream result {};
+        result << getPotionSizeName(getSize()) << " potion of " 
+               << getPotionTypeName(getType());
+
+        // We can extract the string from an std::stringstream using str()
+        // member function
+        return result.str();
+
+          
+        // C++ 20's format is an even cleaner option
+        // return std::format("{} potion of {}", getPotionSizeName(getSize()), 
+        //                     getPotionTypeName(getType()));
+    }
+
+    static Potion getRandomPotion() {
+        return Potion {
+            static_cast<Type>(Random::get(0, max_type - 1)),
+            static_cast<Size>(Random::get(0, max_size - 1))
+        };
+    }
+};
 class Creature {
 protected:
     std::string mName {};
@@ -47,6 +125,28 @@ public:
 
     int getLevel() const { return mLevel; }
     bool hasWon() { return mLevel >= 20; }
+
+    // Applies a potion's effect to the player
+    void drinkPotion(const Potion& potion) {
+        switch(potion.getType()) {
+            case Potion::health:
+                // Only a health potion's size affects its power. All other
+                // potions are independent of size
+                mHealth += ((potion.getSize() == Potion::large) ? 5 : 2);
+                break;
+            case Potion::strength:
+                ++mDamage;
+                break;
+            case Potion::poison:
+                reduceHealth(1);
+                break;
+                // Handle max_type to silence the compiler warning, don't use
+                // default: because we want the compiler to warn us if add a new
+                // potion but forget to implement its effect.
+            case Potion::max_type:
+                break;
+        }
+    }
 };
 
 class Monster : public Creature {
@@ -90,6 +190,34 @@ char getChoice() {
     }
 }
 
+void onMonsterKilled(Player& player, const Monster& monster) {
+    std::cout << "You killed the " << monster.getName() << ".\n";
+    player.levelUp();
+    std::cout << "You are now level " << player.getLevel() << ".\n";
+    std::cout << "You found " << monster.getGold() << " gold.\n";
+    player.addGold(monster.getGold());
+
+    // 30% chance of finding a potion
+    constexpr int potionChance { 30 };
+    if (Random::get(1, 100) <= potionChance) {
+        // Generate a random potion
+        auto potion { Potion::getRandomPotion() };
+
+        std::cout << "You found a mythical potion! Do you want to drink it? "
+                  << "[y/n]: ";
+        char choice {};
+        std::cin >> choice;
+
+        if (choice == 'Y' || choice == 'y') {
+            // Apply the effect
+            player.drinkPotion(potion);
+            // Reveal the potion type and size
+            std::cout << "You drank a " << potion.getName() << ".\n";
+        }
+    }
+
+}
+
 void attackPlayer(const Monster& monster, Player& player) {
     // If the monster is dead, it can't attack the player
     if (monster.isDead()) {
@@ -111,13 +239,10 @@ void attackMonster(Player& player, Monster& monster) {
 
     monster.reduceHealth(player.getDamage());
 
+    // If the monster is now dead, level the player up
     if (monster.isDead()) {
-        std::cout << "You killed the " << monster.getName() << "\n";
-        player.levelUp();
-        std::cout << "You are now level " 
-                    << player.getLevel() << "\n";
-        std::cout << "You found " << monster.getGold() << " gold.\n";
-        player.addGold(monster.getGold());
+        // Reward the player
+        onMonsterKilled(player, monster);
     }
 }
 
@@ -175,7 +300,7 @@ int main()
         std::cout << "Too bad you can't take it with you :(\n";
     } else {
         std::cout << "You won at level " << player.getLevel() << " with "
-                  << player.getGold() << ". Congratulations :)\n";
+                  << player.getGold() << " gold. Congratulations :)\n";
     }
 
 	return 0;
