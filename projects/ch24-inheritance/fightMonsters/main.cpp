@@ -39,6 +39,35 @@ public:
         mGold += amount;
     }
 
+    void addDamage(int damage) {
+        mDamage += damage;
+    }
+
+};
+
+class Player : public Creature {
+private:
+    int mLevel { 1 };
+
+public:
+    Player(std::string_view name)
+        : Creature { name, '@', 10, 1, 0}
+    {}
+
+    void levelUp() {
+        mLevel += 1;
+        addDamage(1);
+    }
+
+    int getLevel() const { return mLevel; }
+
+    bool hasWon() {
+        if (mLevel == 20) {
+            return true;
+        }
+
+        return false;
+    }
 };
 
 int main()
@@ -47,6 +76,14 @@ int main()
 	o.addGold(5);
 	o.reduceHealth(1);
 	std::cout << "The " << o.getName() << " has " << o.getHealth() << " health and is carrying " << o.getGold() << " gold.\n";
+
+    std::cout << "Enter your name: ";
+    std::string name {};
+    std::cin >> name;
+    Player player { name };
+    std::cout << "Welcome, " << player.getName() << "\n";
+    std::cout << "You have " << player.getHealth() << " health and are "
+              << "carrying " << player.getGold() << " gold.\n";
 
 	return 0;
 }
