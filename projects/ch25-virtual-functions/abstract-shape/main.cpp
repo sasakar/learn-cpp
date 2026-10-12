@@ -1,5 +1,7 @@
 #include <iostream>
 #include <vector>
+#include <algorithm>
+#include <memory>
 class Point {
 private:
     int mX {};
@@ -58,35 +60,29 @@ public:
     int getRadius() const { return mRadius; }
 };
 
-int getLargestRadius(const std::vector<Shape*>& v) {
-    int largestRadius { 0 };
+int getLargestRadius(const std::vector<std::unique_ptr<Shape>>& v) {
+	int largestRadius{ 0 };
 
-    // Loop through all the shapes in the vector
-    for (const auto* element : v) {
-        // Ensure the dynamic cast succeeds by checking for a null pointer 
-        // result
-        if (auto* c { dynamic_cast<const Circle*>(element) }) {
-            largestRadius = std::max(largestRadius, c->getRadius());
-        }
-    }
+	// Loop through all the shapes in the vector
+	for (const auto& element : v) {
+		// // Ensure the dynamic cast succeeds by checking for a null pointer result
+		if (auto *c { dynamic_cast<const Circle*>(element.get()) })
+		{
+			largestRadius = std::max(largestRadius, c->getRadius());
+		}
+	}
 
-    return largestRadius;
+	return largestRadius;
 }
 
 int main() {
-	std::vector<Shape*> v{
-		  new Circle{Point{ 1, 2 }, 7},
-		  new Triangle{Point{ 1, 2 }, Point{ 3, 4 }, Point{ 5, 6 }},
-		  new Circle{Point{ 7, 8 }, 3}
-	};
+	std::vector<std::unique_ptr<Shape>> v;
+	v.reserve(3);
+	v.push_back(std::make_unique<Circle>(Point{1, 2}, 7));
+	v.push_back(std::make_unique<Triangle>(Point{1, 2}, Point{3, 4}, Point{5, 6}));
+	v.push_back(std::make_unique<Circle>(Point{7, 8}, 3));
 
-	for (const auto* element : v) // element will be a Shape*
-		std::cout << *element << '\n';
+	for (const auto& element : v) std::cout << *element << '\n';
 
 	std::cout << "The largest radius is: " << getLargestRadius(v) << '\n';
-
-	for (const auto* element : v)
-		delete element;
-
-	return 0;
 }
