@@ -1,5 +1,5 @@
 #include <iostream>
-
+#include <vector>
 class Point {
 private:
     int mX {};
@@ -54,14 +54,39 @@ public:
     std::ostream& print(std::ostream& out) const override {
         return out << "Circle(" << mCenter << ", radius " << mRadius << ")";
     }
+
+    int getRadius() const { return mRadius; }
 };
 
+int getLargestRadius(const std::vector<Shape*>& v) {
+    int largestRadius { 0 };
+
+    // Loop through all the shapes in the vector
+    for (const auto* element : v) {
+        // Ensure the dynamic cast succeeds by checking for a null pointer 
+        // result
+        if (auto* c { dynamic_cast<const Circle*>(element) }) {
+            largestRadius = std::max(largestRadius, c->getRadius());
+        }
+    }
+
+    return largestRadius;
+}
+
 int main() {
-    Circle c { Point { 1, 2 }, 7 };
-    std::cout << c << "\n";
+	std::vector<Shape*> v{
+		  new Circle{Point{ 1, 2 }, 7},
+		  new Triangle{Point{ 1, 2 }, Point{ 3, 4 }, Point{ 5, 6 }},
+		  new Circle{Point{ 7, 8 }, 3}
+	};
 
-    Triangle t { Point { 1, 2 }, Point { 3, 4 }, Point { 5, 6 } };
-    std::cout << t << "\n";
+	for (const auto* element : v) // element will be a Shape*
+		std::cout << *element << '\n';
 
-    return 0;
+	std::cout << "The largest radius is: " << getLargestRadius(v) << '\n';
+
+	for (const auto* element : v)
+		delete element;
+
+	return 0;
 }
